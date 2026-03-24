@@ -53861,6 +53861,22 @@
     "hasCustomAssemblyFormat": true
   },
   {
+    "name": "spirv.Tosa.Concat",
+    "summary": "Concatenates tensors along one dimension.",
+    "description": "Concatenates a list of tensors along a given axis.\n    No data conversion happens during a concat operation.\n\n    References:\n      * https://github.khronos.org/SPIRV-Registry/extended/TOSA.001000.1.html#_concat\n      * https://www.mlplatform.org/tosa/tosa_spec_1_0_1.html#_concat\n\n    #### Example:\n    ```mlir\n    %1 = spirv.Tosa.Concat axis = 2, %arg0, %arg1, %arg2, %arg3 : !spirv.arm.tensor<12x13x3x14xi8>, !spirv.arm.tensor<12x13x3x14xi8>, !spirv.arm.tensor<12x13x3x14xi8>, !spirv.arm.tensor<12x13x3x14xi8> -> !spirv.arm.tensor<12x13x12x14xi8>\n    %1 = spirv.Tosa.Concat axis = 1, %arg0, %arg1, %arg2 : !spirv.arm.tensor<40x31x19xf32>, !spirv.arm.tensor<40x15x19xf32>, !spirv.arm.tensor<40x16x19xf32> -> !spirv.arm.tensor<40x62x19xf32>\n    ```",
+    "operands": [
+      { "name": "input1", "type": "Variadic<SPIRV_TosaAny_TensorArm>" }
+    ],
+    "results": [
+      { "name": "output", "type": "SPIRV_TosaAny_TensorArm" }
+    ],
+    "attributes": [
+      { "name": "axis", "type": "ConfinedAttr<I32Attr, [IntNonNegative, IntMaxValue<5>]>" }
+    ],
+    "assemblyFormat": "`axis` `=` $axis `,`\n    $input1\n    attr-dict `:` type(operands) `->` type(results)",
+    "hasCustomAssemblyFormat": true
+  },
+  {
     "name": "spirv.Tosa.Conv2D",
     "summary": "2D Convolution operator.",
     "description": "Performs a 2D convolution over the given tensor input, using the weight\n    tensor. Implementations may choose to skip calculation of multiplies in\n    the padding area.\n\n    Input and weight have respective zero point values provided in input_zp and weight_zp.\n\n    References:\n      * https://github.khronos.org/SPIRV-Registry/extended/TOSA.001000.1.html#_conv2d\n      * https://www.mlplatform.org/tosa/tosa_spec_1_0_1.html#_conv2d\n\n    #### Example:\n    ```mlir\n    %7 = spirv.Tosa.Conv2D pad = [1, 0, 0, 0], stride = [1, 2], dilation = [7, 1], acc_type = <INT32>, local_bound = false, %arg0, %arg1, %arg2, %5, %6 : !spirv.arm.tensor<1x65535x3x1xi8>, !spirv.arm.tensor<7x1x1x1xi8>, !spirv.arm.tensor<1xi32>, !spirv.arm.tensor<1xi8>, !spirv.arm.tensor<1xi8> -> !spirv.arm.tensor<1x65536x2x7xi32>\n    %7 = spirv.Tosa.Conv2D pad = [0, 0, 0, 0], stride = [1, 1], dilation = [1, 1], acc_type = <FP16>, local_bound = true, %arg0, %arg1, %arg2, %5, %6 : !spirv.arm.tensor<1x34x18x27xf16>, !spirv.arm.tensor<11x1x1x27xf16>, !spirv.arm.tensor<11xf16>, !spirv.arm.tensor<1xf16>, !spirv.arm.tensor<1xf16> -> !spirv.arm.tensor<1x34x18x11xf16>\n    ```",
@@ -54275,6 +54291,21 @@
     "hasCustomAssemblyFormat": true
   },
   {
+    "name": "spirv.Tosa.Pad",
+    "summary": "Pads a tensor with value specified.",
+    "description": "Pads a tensor along the borders of each dimension with a supplied value.\n    Returns a new tensor with the padding included. The pad_const value includes\n    the zero point if the tensor uses a zero point.\n\n    References:\n      * https://github.khronos.org/SPIRV-Registry/extended/TOSA.001000.1.html#_pad\n      * https://www.mlplatform.org/tosa/tosa_spec_1_0_1.html#_pad\n\n    #### Example:\n    ```mlir\n    %2 = spirv.Tosa.Pad %arg0, %0, %1 : !spirv.arm.tensor<4x7xi8>, !spirv.arm.tensor<4xi32>, !spirv.arm.tensor<1xi8> -> !spirv.arm.tensor<21x19xi8>\n    %2 = spirv.Tosa.Pad %arg0, %0, %1 : !spirv.arm.tensor<2x9x2x3xf32>, !spirv.arm.tensor<8xi32>, !spirv.arm.tensor<1xf32> -> !spirv.arm.tensor<4x9x4x4xf32>\n    ```",
+    "operands": [
+      { "name": "input1", "type": "SPIRV_TosaAny_TensorArm" },
+      { "name": "padding", "type": "SPIRV_Int32_1DTensorArmOfEvenLength2To12" },
+      { "name": "pad_const", "type": "SPIRV_TosaAny_1DTensorArmOfLength1" }
+    ],
+    "results": [
+      { "name": "output", "type": "SPIRV_TosaAny_TensorArm" }
+    ],
+    "assemblyFormat": "$input1 `,`\n    $padding `,`\n    $pad_const\n    attr-dict `:` type(operands) `->` type(results)",
+    "hasCustomAssemblyFormat": true
+  },
+  {
     "name": "spirv.Tosa.Pow",
     "summary": "Power operator.",
     "description": "Elementwise input1 value raised to the Power of input2.\n    Axis of size 1 will be broadcast, as necessary. Rank of input tensors must\n    match. The behavior is undefined if the the input1 value is negative, or\n    both input values are zero or negative, or both input values are NaN or\n    infinite.\n\n    References:\n      * https://github.khronos.org/SPIRV-Registry/extended/TOSA.001000.1.html#_pow\n      * https://www.mlplatform.org/tosa/tosa_spec_1_0_1.html#_pow\n\n    #### Example:\n    ```mlir\n    %0 = spirv.Tosa.Pow %arg0, %arg1 : !spirv.arm.tensor<1x52x53xf16>, !spirv.arm.tensor<44x52x53xf16> -> !spirv.arm.tensor<44x52x53xf16>\n    ```",
@@ -54400,6 +54431,20 @@
       { "name": "axis", "type": "ConfinedAttr<I32Attr, [IntNonNegative, IntMaxValue<5>]>" }
     ],
     "assemblyFormat": "`axis` `=` $axis `,`\n    $input\n    attr-dict `:` type(operands) `->` type(results)",
+    "hasCustomAssemblyFormat": true
+  },
+  {
+    "name": "spirv.Tosa.Reshape",
+    "summary": "Reshape operator.",
+    "description": "Returns a tensor with the same type/values as the input, with a new shape\n    specified by the shape argument. Reshape may operate on tensors of any rank.\n    No data conversion happens during a reshape operation.\n\n    References:\n      * https://github.khronos.org/SPIRV-Registry/extended/TOSA.001000.1.html#_reshape\n      * https://www.mlplatform.org/tosa/tosa_spec_1_0_1.html#_reshape\n\n    #### Example:\n    ```mlir\n    %1 = spirv.Tosa.Reshape %arg0, %newShape : !spirv.arm.tensor<25x6x29x35xi16>, !spirv.arm.tensor<4xi32> -> !spirv.arm.tensor<125x6x7x29xi16>\n    %1 = spirv.Tosa.Reshape %arg0, %newShape : !spirv.arm.tensor<1x2x7x2xf32>, !spirv.arm.tensor<3xi32> -> !spirv.arm.tensor<2x1x14xf32>\n    ```",
+    "operands": [
+      { "name": "input1", "type": "SPIRV_TosaAny_TensorArm" },
+      { "name": "shape", "type": "SPIRV_Int32_1DTensorArmOfLength1To6" }
+    ],
+    "results": [
+      { "name": "output", "type": "SPIRV_TosaAny_TensorArm" }
+    ],
+    "assemblyFormat": "$input1 `,`\n    $shape\n    attr-dict `:` type(operands) `->` type(results)",
     "hasCustomAssemblyFormat": true
   },
   {
@@ -63073,6 +63118,22 @@
     "results": [
       { "name": "result", "type": "AnyTensor" }
     ]
+  },
+  {
+    "name": "test.op_with_two_default_bit_enum_props",
+    "attributes": [
+      { "name": "value1", "type": "TestBitEnumPropDefault{read|write|execute}" },
+      { "name": "value2", "type": "TestBitEnumVerticalBarPropDefault{user|group|other}" }
+    ],
+    "assemblyFormat": "($value1^)? ($value2^)? attr-dict"
+  },
+  {
+    "name": "test.op_with_two_default_enum_props",
+    "attributes": [
+      { "name": "value1", "type": "TestEnumPropDefault{first|second|third}" },
+      { "name": "value2", "type": "TestOtherEnumPropDefault{dog|cat|fish}" }
+    ],
+    "assemblyFormat": "($value1^)? ($value2^)? attr-dict"
   },
   {
     "name": "test.op_with_variadic_results_and_folder",
@@ -113790,7 +113851,8 @@
       { "name": "query", "type": "AnyRankedTensor" },
       { "name": "key", "type": "AnyRankedTensor" },
       { "name": "value", "type": "AnyRankedTensor" },
-      { "name": "attention_mask", "type": "Optional<AnyRankedTensor>" }
+      { "name": "attention_mask", "type": "Optional<AnyRankedTensor>" },
+      { "name": "attention_sink", "type": "Optional<AnyRankedTensor>" }
     ],
     "results": [
       { "name": "result", "type": "AnyRankedTensor" }
@@ -113799,6 +113861,9 @@
       { "name": "is_causal", "type": "DefaultValuedAttr<BoolAttr, true>" },
       { "name": "scale", "type": "OptionalAttr<F32Attr>" },
       { "name": "sliding_window_size", "type": "OptionalAttr<UI32Attr>" }
+    ],
+    "traits": [
+      { "type": "AttrSizedOperandSegments" }
     ]
   },
   {
@@ -116007,7 +116072,7 @@
       { "name": "out_cb", "type": "TTKernel_CB" }
     ],
     "attributes": [
-      { "name": "reduce_type", "type": "TTKernel_ReduceTypeAttr{reduce_sum|reduce_max}" },
+      { "name": "reduce_type", "type": "TTKernel_ReduceTypeAttr{reduce_sum|reduce_max|reduce_avg}" },
       { "name": "reduce_dim", "type": "TTKernel_ReduceDimAttr{reduce_dim_row|reduce_dim_col|reduce_dim_scalar}" },
       { "name": "full_fp32", "type": "UnitAttr" }
     ],
@@ -116025,7 +116090,7 @@
       { "name": "dst_index", "type": "IndexLike" }
     ],
     "attributes": [
-      { "name": "reduce_type", "type": "TTKernel_ReduceTypeAttr{reduce_sum|reduce_max}" },
+      { "name": "reduce_type", "type": "TTKernel_ReduceTypeAttr{reduce_sum|reduce_max|reduce_avg}" },
       { "name": "reduce_dim", "type": "TTKernel_ReduceDimAttr{reduce_dim_row|reduce_dim_col|reduce_dim_scalar}" },
       { "name": "full_fp32", "type": "UnitAttr" }
     ],
@@ -119429,7 +119494,8 @@
       { "name": "query", "type": "AnyRankedTensor" },
       { "name": "key", "type": "AnyRankedTensor" },
       { "name": "value", "type": "AnyRankedTensor" },
-      { "name": "attention_mask", "type": "Optional<AnyRankedTensor>" }
+      { "name": "attention_mask", "type": "Optional<AnyRankedTensor>" },
+      { "name": "attention_sink", "type": "Optional<AnyRankedTensor>" }
     ],
     "results": [
       { "name": "result", "type": "AnyRankedTensor" }
@@ -119439,6 +119505,9 @@
       { "name": "scale", "type": "OptionalAttr<F32Attr>" },
       { "name": "sliding_window_size", "type": "OptionalAttr<UI32Attr>" },
       { "name": "memory_config", "type": "OptionalAttr<TTNN_MemoryConfigAttr>" }
+    ],
+    "traits": [
+      { "type": "AttrSizedOperandSegments" }
     ]
   },
   {
